@@ -9,12 +9,14 @@ import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
 import * as strings from 'HelloWorldWebPartStrings';
-import HelloWorld from './components/HelloWorld';
-import { IHelloWorldProps } from './components/IHelloWorldProps';
+import ContactCard from './components/ContactCard';
+import { IContactCardProps } from './components/IContactCardProps';
 
 export interface IHelloWorldWebPartProps {
-  description: string;
+  name: string;
   title: string;
+  role: string;
+  email: string;
 }
 
 export default class HelloWorldWebPart extends BaseClientSideWebPart<IHelloWorldWebPartProps> {
@@ -22,15 +24,15 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<IHelloWorld
   private _environmentMessage: string = '';
 
   public render(): void {
-    const element: React.ReactElement<IHelloWorldProps> = React.createElement(
-      HelloWorld,
+    const element: React.ReactElement<IContactCardProps> = React.createElement(
+      ContactCard,
       {
-        description: this.properties.description,
-        isDarkTheme: this._isDarkTheme,
-        environmentMessage: this._environmentMessage,
-        userDisplayName: this.context.pageContext.user.displayName,
-        siteTitle: this.context.pageContext.web.title,
+        
+        name: this.properties.name,
+
         title: this.properties.title,
+        role: this.properties.role,
+        email: this.properties.email,
       },
     );
 
@@ -111,6 +113,14 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<IHelloWorld
     return Version.parse('1.0');
   }
 
+  private _validateEmail = (value: string): string => {
+    if (!value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      return '';
+    }
+
+    return 'Bitte geben Sie eine gültige E-Mail-Adresse ein.';
+  };
+
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
       pages: [
@@ -122,12 +132,19 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<IHelloWorld
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('description', {
-                  label: strings.DescriptionFieldLabel,
-                }),
-                PropertyPaneTextField('title', {
-                  label: 'Title',
-                }),
+  PropertyPaneTextField('title', {
+    label: 'Titel',
+  }),
+  PropertyPaneTextField('name', {
+    label: 'Name',
+  }),
+  PropertyPaneTextField('role', {
+    label: 'Rolle',
+  }),
+  PropertyPaneTextField('email', {
+    label: 'E-Mail',
+    onGetErrorMessage: this._validateEmail,
+  }),
               ],
             },
           ],
